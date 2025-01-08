@@ -1,0 +1,68 @@
+body {
+    font-family: 'el messiri', sans-serif;
+    background-color: #e7d6cf;
+    margin: 0;
+    padding: 20px;
+}
+
+h1 {
+    color: #460f22;
+    margin-bottom: 30px;
+}
+
+.logo-container {
+    display: flexbox;
+}
+
+.logo {
+    width: 60%;
+    height: 60%;
+}
+
+a.waves-effect, button.waves-effect {
+    margin-bottom: 20px;
+    display: inline-block;
+    background-color: #c59892 !important;
+    height: 4cm;
+    width: 8cm;
+    line-height: 4cm; /* Ajusta o alinhamento vertical do texto */
+    text-align: center;
+    font-size: 1.2em; /* Ajusta o tamanho do texto */
+    font-family: el messiri;
+}
+
+input, textarea {
+    margin-bottom: 20px;
+}
+
+input[type="text"]:focus, textarea:focus {
+    border-bottom: 2px solid #c59892 !important;
+    box-shadow: 0 1px 0 0 #c59892 !important;
+}
+/* label color */
+.input-field label {
+    color: #c59892;
+}
+/* label focus color */
+.input-field input[type=text]:focus + label {
+    color: #c59892;
+}
+/* label underline focus color */
+.input-field input[type=text]:focus {
+    border-bottom: 1px solid #c59892;
+    box-shadow: 0 1px 0 0 #c59892;
+}
+/* valid color */
+.input-field input[type=text].valid {
+    border-bottom: 1px solid #c59892;
+    box-shadow: 0 1px 0 0 #c59892;
+}
+/* invalid color */
+.input-field input[type=text].invalid {
+    border-bottom: 1px solid #c59892;
+    box-shadow: 0 1px 0 0 #c59892;
+}
+/* icon prefix focus color */
+.input-field .prefix.active {
+    color: #c59892;
+}
