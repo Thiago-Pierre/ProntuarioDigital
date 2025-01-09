@@ -1,11 +1,14 @@
-from flask import Flask, request, jsonify, render_template
+from flask import Flask, request, jsonify, render_template, redirect, url_for
 from flask_sqlalchemy import SQLAlchemy
+from werkzeug.utils import secure_filename
+import os
 
 app = Flask(__name__)
 
 # Configuração do banco de dados
 app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:123456@127.0.0.1:3306/pront_db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['UPLOAD_FOLDER'] = 'static/uploads'  # Pasta onde as fotos serão armazenadas
 
 db = SQLAlchemy(app)
 
@@ -19,6 +22,7 @@ class Paciente(db.Model):
     cep = db.Column(db.String(8), nullable=False)
     endereco = db.Column(db.String(200), nullable=False)
     anotacoes = db.Column(db.Text, nullable=True)
+    fotos = db.Column(db.Text, nullable=True)  # Coluna para armazenar os caminhos das fotos
 
 @app.route('/')
 def index():
@@ -30,7 +34,8 @@ def cadastro():
 
 @app.route('/pacientes')
 def pacientes():
-    return render_template('pacientes.html')
+    pacientes = Paciente.query.all()
+    return render_template('pacientes.html', pacientes=pacientes)
 
 @app.route('/api/cadastrar', methods=['POST'])
 def cadastrar():
@@ -66,7 +71,61 @@ def cadastrar():
         print(f"Erro ao cadastrar paciente: {e}")
         return jsonify({'message': 'Erro ao cadastrar paciente.'}), 400
 
+@app.route('/api/editar/<int:id>', methods=['POST'])
+def editar(id):
+    try:
+        data = request.json
+        paciente = Paciente.query.get(id)
+        if not paciente:
+            return jsonify({'message': 'Paciente não encontrado.'}), 404
+
+        paciente.cpf = data['cpf']
+        paciente.rg = data['rg']
+        paciente.telefone = data['telefone']
+        paciente.cep = data['cep']
+        paciente.endereco = data['endereco']
+        paciente.anotacoes = data.get('anotacoes')
+
+        db.session.commit()
+
+        print(f'Paciente Atualizado: {paciente.nome}, CPF: {paciente.cpf}, RG: {paciente.rg}, Telefone: {paciente.telefone}, CEP: {paciente.cep}, Endereço: {paciente.endereco}, Anotações: {paciente.anotacoes}')
+        return jsonify({'message': 'Dados do paciente atualizados com sucesso!'})
+    
+    except Exception as e:
+        print(f"Erro ao atualizar paciente: {e}")
+        return jsonify({'message': 'Erro ao atualizar paciente.'}), 400
+
+@app.route('/api/upload/<int:id>', methods=['POST'])
+def upload(id):
+    try:
+        if 'file' not in request.files:
+            return jsonify({'message': 'Nenhum arquivo enviado.'}), 400
+        file = request.files['file']
+        if file.filename == '':
+            return jsonify({'message': 'Nenhum arquivo selecionado.'}), 400
+
+        paciente = Paciente.query.get(id)
+        if not paciente:
+            return jsonify({'message': 'Paciente não encontrado.'}), 404
+
+        filename = secure_filename(file.filename)
+        file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        file.save(file_path)
+
+        if paciente.fotos:
+            paciente.fotos += f";{file_path}"
+        else:
+            paciente.fotos = file_path
+
+        db.session.commit()
+        print(f'Foto adicionada para o paciente {paciente.nome}: {file_path}')
+        return jsonify({'message': 'Foto adicionada com sucesso!', 'file_path': file_path})
+    
+    except Exception as e:
+        print(f"Erro ao adicionar foto: {e}")
+        return jsonify({'message': 'Erro ao adicionar foto.'}), 400
+
 if __name__ == '__main__':
     with app.app_context():
-        db.create_all()  # Cria as tabelas no banco de dados
+        db.create_all()  # Cria as tabelas no banco de dados, incluindo a nova coluna de fotos
     app.run(debug=True)
