@@ -5,7 +5,7 @@ body {
     padding: 20px;
 }
 
-h1 {
+h1, .pacientes-title {
     color: #460f22;
     margin-bottom: 30px;
 }
@@ -23,12 +23,22 @@ a.waves-effect, button.waves-effect {
     margin-bottom: 20px;
     display: inline-block;
     background-color: #c59892 !important;
+}
+
+a.custom-btn {
     height: 4cm;
     width: 8cm;
     line-height: 4cm; /* Ajusta o alinhamento vertical do texto */
     text-align: center;
     font-size: 1.2em; /* Ajusta o tamanho do texto */
     font-family: el messiri;
+}
+
+a.custom-btn-small {
+    padding: 0 1rem; /* Ajusta o espaçamento interno dos botões menores */
+    font-size: 1em; /* Tamanho do texto */
+    height: auto; /* Permite que o botão ajuste sua altura conforme o texto */
+    line-height: initial; /* Reseta o alinhamento vertical do texto */
 }
 
 input, textarea {
@@ -65,4 +75,17 @@ input[type="text"]:focus, textarea:focus {
 /* icon prefix focus color */
 .input-field .prefix.active {
     color: #c59892;
+}
+
+.file-field .btn {
+    background-color: #c59892 !important;
+}
+
+/* Estilo para as fotos pequenas */
+.mini-photo {
+    width: 100px; /* Largura das fotos pequenas */
+    height: auto; /* Altura automática para manter a proporção */
+    margin: 10px 0; /* Margem superior e inferior */
+    border: 1px solid #ccc; /* Borda cinza clara ao redor da foto */
+    border-radius: 5px; /* Bordas arredondadas */
 }
