@@ -19,7 +19,7 @@ document.getElementById('cadastroForm').addEventListener('submit', function(even
     .then(obj => {
         if (obj.status === 200) {
             alert(obj.body.message);
-            window.location.href = '/';
+            window.location.href = '/'; // Redireciona para a página inicial
         } else {
             alert('Erro: ' + obj.body.message);
         }
