@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pacientes Cadastrados</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}">
+</head>
+<body>
+    <div class="container">
+        <h1 class="center-align pacientes-title">Pacientes Cadastrados</h1>
+        <table class="striped centered">
+            <thead>
+                <tr>
+                    <th>Nome</th>
+                    <th>Ação</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for paciente in pacientes %}
+                <tr>
+                    <td>{{ paciente.nome }}</td>
+                    <td><a class="waves-effect waves-light btn-small custom-btn-small modal-trigger" href="#modal{{ paciente.id }}">Ver</a></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Modal Structure -->
+    {% for paciente in pacientes %}
+    <div id="modal{{ paciente.id }}" class="modal">
+        <div class="modal-content">
+            <h4>{{ paciente.nome }}</h4>
+            <form id="editForm{{ paciente.id }}" class="edit-form">
+                <div class="input-field">
+                    <input type="text" id="cpf{{ paciente.id }}" name="cpf" value="{{ paciente.cpf }}" required>
+                    <label for="cpf{{ paciente.id }}" class="active">CPF</label>
+                </div>
+                <div class="input-field">
+                    <input type="text" id="rg{{ paciente.id }}" name="rg" value="{{ paciente.rg }}" required>
+                    <label for="rg{{ paciente.id }}" class="active">RG</label>
+                </div>
+                <div class="input-field">
+                    <input type="tel" id="telefone{{ paciente.id }}" name="telefone" value="{{ paciente.telefone }}" required>
+                    <label for="telefone{{ paciente.id }}" class="active">Telefone</label>
+                </div>
+                <div class="input-field">
+                    <input type="text" id="cep{{ paciente.id }}" name="cep" value="{{ paciente.cep }}" required>
+                    <label for="cep{{ paciente.id }}" class="active">CEP</label>
+                </div>
+                <div class="input-field">
+                    <input type="text" id="endereco{{ paciente.id }}" name="endereco" value="{{ paciente.endereco }}" required>
+                    <label for="endereco{{ paciente.id }}" class="active">Endereço</label>
+                </div>
+                <div class="input-field">
+                    <textarea id="anotacoes{{ paciente.id }}" name="anotacoes" class="materialize-textarea">{{ paciente.anotacoes }}</textarea>
+                    <label for="anotacoes{{ paciente.id }}" class="active">Anotações</label>
+                </div>
+                <!-- Campo de exibição de fotos -->
+                <div class="input-field">
+                    <label for="fotos{{ paciente.id }}" class="active">Fotos</label>
+                    <div id="fotos{{ paciente.id }}">
+                        {% if paciente.fotos %}
+                            {% for foto in paciente.fotos.split(';') %}
+                            <img src="{{ url_for('static', filename=paciente.foto) }}" alt="Foto do Paciente">
+                            {% endfor %}
+                        {% else %}
+                            <p>Não há fotos.</p>
+                        {% endif %}
+                    </div>
+                </div>
+                <!-- Formulário de Upload de Fotos -->
+                <form id="uploadForm{{ paciente.id }}" class="upload-form" enctype="multipart/form-data">
+                    <div class="file-field input-field">
+                        <div class="btn">
+                            <span>Upload Foto</span>
+                            <input type="file" name="file" required>
+                        </div>
+                        <div class="file-path-wrapper">
+                            <input class="file-path validate" type="text">
+                        </div>
+                    </div>
+                    <div class="center-align">
+                        <button type="submit" class="waves-effect waves-light btn">Adicionar Foto</button>
+                    </div>
+                </form>
+                <div class="center-align" style="margin-top: 20px;">
+                    <button type="submit" class="waves-effect waves-light btn">Salvar Dados</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    {% endfor %}
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var elems = document.querySelectorAll('.modal');
+            var instances = M.Modal.init(elems);
+
+            var editForms = document.querySelectorAll('.edit-form');
+            editForms.forEach(function(form) {
+                form.addEventListener('submit', function(event) {
+                    event.preventDefault();
+                    var formData = new FormData(this);
+                    var pacienteId = this.id.replace('editForm', '');
+                    fetch('/api/editar/' + pacienteId, {
+                        method: 'POST',
+                        body: JSON.stringify(Object.fromEntries(formData.entries())),
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.message) {
+                            alert(data.message);
+                            window.location.reload(); // Recarrega a página para atualizar os dados
+                        } else {
+                            alert('Erro ao atualizar os dados');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Erro ao atualizar os dados:', error);
+                    });
+                });
+            });
+
+            var uploadForms = document.querySelectorAll('.upload-form');
+            uploadForms.forEach(function(form) {
+                form.addEventListener('submit', function(event) {
+                    event.preventDefault();
+                    var formData = new FormData(this);
+                    var pacienteId = this.id.replace('uploadForm', '');
+                    fetch('/api/upload/' + pacienteId, {
+                        method: 'POST',
+                        body: formData
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.message) {
+                            alert(data.message);
+                            window.location.reload(); // Recarrega a página para atualizar as fotos
+                        } else {
+                            alert('Erro ao adicionar foto');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Erro ao adicionar foto:', error);
+                    });
+                });
+            });
+        });
+    </script>
+</body>
+</html>
