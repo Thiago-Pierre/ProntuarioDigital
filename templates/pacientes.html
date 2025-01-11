@@ -15,7 +15,7 @@
             <thead>
                 <tr>
                     <th>Nome</th>
-                    <th>Ação</th>
+                    <th> </th>
                 </tr>
             </thead>
             <tbody>
@@ -65,7 +65,7 @@
                     <div id="fotos{{ paciente.id }}">
                         {% if paciente.fotos %}
                             {% for foto in paciente.fotos.split(';') %}
-                            <img src="{{ url_for('static', filename=paciente.foto) }}" alt="Foto do Paciente">
+                                <img src="{{ url_for('static', filename=foto) }}" alt="Foto" class="responsive-img mini-photo">
                             {% endfor %}
                         {% else %}
                             <p>Não há fotos.</p>
@@ -77,13 +77,14 @@
                     <div class="file-field input-field">
                         <div class="btn">
                             <span>Upload Foto</span>
-                            <input type="file" name="file" required>
+                            <input type="file" name="file" id="file{{ paciente.id }}" required>
                         </div>
                         <div class="file-path-wrapper">
                             <input class="file-path validate" type="text">
                         </div>
                     </div>
                     <div class="center-align">
+                        <a href="#cameraModal{{ paciente.id }}" class="waves-effect waves-light btn modal-trigger">Capturar Foto</a>
                         <button type="submit" class="waves-effect waves-light btn">Adicionar Foto</button>
                     </div>
                 </form>
@@ -93,67 +94,22 @@
             </form>
         </div>
     </div>
+
+    <!-- Modal de Captura de Foto -->
+    <div id="cameraModal{{ paciente.id }}" class="modal camera-modal">
+        <div class="modal-content">
+            <h4>Capturar Foto</h4>
+            <video id="video{{ paciente.id }}" width="100%" autoplay></video>
+            <button id="capture{{ paciente.id }}" class="waves-effect waves-light btn">Capturar</button>
+            <canvas id="canvas{{ paciente.id }}" style="display: none;"></canvas>
+        </div>
+        <div class="modal-footer">
+            <a href="#!" class="modal-close waves-effect waves-green btn-flat">Fechar</a>
+        </div>
+    </div>
     {% endfor %}
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            var elems = document.querySelectorAll('.modal');
-            var instances = M.Modal.init(elems);
-
-            var editForms = document.querySelectorAll('.edit-form');
-            editForms.forEach(function(form) {
-                form.addEventListener('submit', function(event) {
-                    event.preventDefault();
-                    var formData = new FormData(this);
-                    var pacienteId = this.id.replace('editForm', '');
-                    fetch('/api/editar/' + pacienteId, {
-                        method: 'POST',
-                        body: JSON.stringify(Object.fromEntries(formData.entries())),
-                        headers: {
-                            'Content-Type': 'application/json'
-                        }
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.message) {
-                            alert(data.message);
-                            window.location.reload(); // Recarrega a página para atualizar os dados
-                        } else {
-                            alert('Erro ao atualizar os dados');
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Erro ao atualizar os dados:', error);
-                    });
-                });
-            });
-
-            var uploadForms = document.querySelectorAll('.upload-form');
-            uploadForms.forEach(function(form) {
-                form.addEventListener('submit', function(event) {
-                    event.preventDefault();
-                    var formData = new FormData(this);
-                    var pacienteId = this.id.replace('uploadForm', '');
-                    fetch('/api/upload/' + pacienteId, {
-                        method: 'POST',
-                        body: formData
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.message) {
-                            alert(data.message);
-                            window.location.reload(); // Recarrega a página para atualizar as fotos
-                        } else {
-                            alert('Erro ao adicionar foto');
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Erro ao adicionar foto:', error);
-                    });
-                });
-            });
-        });
-    </script>
+    <script src="{{ url_for('static', filename='scripts.js') }}"></script>
 </body>
 </html>
