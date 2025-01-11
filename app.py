@@ -113,9 +113,9 @@ def upload(id):
         file.save(file_path)
 
         if paciente.fotos:
-            paciente.fotos += f";{file_path}"
+            paciente.fotos += f";uploads/{filename}"
         else:
-            paciente.fotos = file_path
+            paciente.fotos = f"uploads/{filename}"
 
         db.session.commit()
         print(f'Foto adicionada para o paciente {paciente.nome}: {file_path}')
